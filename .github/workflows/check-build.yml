@@ -1,0 +1,39 @@
+name: CI - Validação de Código e Commit
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  commit-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do Código
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validar Padrão de Commit
+        uses: wagoid/commitlint-github-action@v5
+
+  verify-build:
+    needs: commit-lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do Código
+        uses: actions/checkout@v4
+
+      - name: Instalando NodeJS
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Instalando Dependencias
+        run: npm ci
+
+      - name: Checagem de Compilação
+        run: npm run build
